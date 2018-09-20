@@ -1,0 +1,92 @@
+BFS
+----
+
+A state/node has been generated if it exists in memory
+
+A generated state/node has been expanded if all of its neighbouring states have been generated from this state
+
+The set of states which have been generated but not expanded comprises the open list
+
+In breadth-first search the open list is a queue
+
+The set of states which have been expanded comprises the closed list
+
+Prolog args + = input, - = output
+
+breadthFirstSearch(+InitialState, -Solution, -Statistics) :-
+	Initial state = (input) state to start with
+ 	Solution = (output) solution series of state connects starts state to goal
+ 	Statistics = (output) statistcs about process
+
+import...
+
+:- consult(queues).
+:- consult(counter).
+:- consult(eightPuzzle).
+
+
+-Statistics is predicate stat(GLevel, Generated, Duplicated, Expanded)
+	object returned by bfs()
+
+	Where GLevel is the g-value at the respective step in the solution
+		g value = distance between current node and initial state
+	Generated is the total number of nodes generated which have a g-value of GLevel
+	Expanded is the number of unique nodes generated which have a g-value of GLevel
+	Duplicated is the number of nodes generated which have a g-value of GLevel AND is a duplicate of another node with this g-value
+	Generated = Duplicated + Expanded
+
+Counters...
+
+This will init a counter for each of the g values for each of the diff statistics
+initCounter(_, generated).
+initCounter(_, expanded).
+initCounter(_, duplicated).
+
+Say we wanted to increase the number of generated nodes at g value = 1
+we would call something like the following
+incrCounter(1, generated).
+
+Now we could get that value by calling
+getValCounter(1, generate, N).
+Where N would = the value
+
+EightPuzzle....
+
+succ8(state, successors) - find all successors of current node
+
+goal8() - tells if current state is the goal state
+
+use the following to avoid ... in lists
+?- set_prolog_flag(answer_write_options,[max_depth(0)]).
+
+queues...
+
+make_queue(-Queue). % Create an empty queue
+
+join_queue(+NewNode, +OldQ, -NewQ). % Add an element to the back of the queue
+
+serve_queue(+OldQ, -FrontNode, -NewQ). % Remove an element from the front of the queue
+
+empty_queue(+Queue). % Clear the queue
+
+queue_to_list(+Queue, -List). % Converts the queue into a list (eg. for debugging)
+
+CLOSED LIST...
+
+CAN USE ASSERT TO IMPLEMENT CLOSE LIST
+
+
+NODES ...
+
+Creating nodes
+You could use assert/1 to create new nodes
+
+Remember that a node is not just the current 8-puzzle state
+
+A node also contains the g-value
+
+If a node also knows its parent node, this will make it easier for you to extract the solution when you have reached the goal state
+
+Suggestion: create a new predicate: node/3 which contains all this information
+
+                           
