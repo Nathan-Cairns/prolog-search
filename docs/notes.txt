@@ -71,12 +71,19 @@ empty_queue(+Queue). % Clear the queue
 
 queue_to_list(+Queue, -List). % Converts the queue into a list (eg. for debugging)
 
+  make_queue(Q1),
+   join_queue(apple, Q1, Q2),
+   join_queue(banana, Q2, Q3),
+   join_queue(orange, Q3, Q4),
+   serve_queue(Q4, First, RemainingQ),
+   queue_to_list(RemainingQ, Remaining).
+
 CLOSED LIST...
 
 CAN USE ASSERT TO IMPLEMENT CLOSE LIST
 
 
-NODES ...
+NODES ...	
 
 Creating nodes
 You could use assert/1 to create new nodes
