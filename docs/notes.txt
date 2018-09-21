@@ -96,7 +96,6 @@ If a node also knows its parent node, this will make it easier for you to extrac
 
 Suggestion: create a new predicate: node/3 which contains all this information
 
-
 set_prolog_flag(answer_write_options,[max_depth(0)]).
 
                            
