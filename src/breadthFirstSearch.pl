@@ -2,9 +2,7 @@
 %
 % AUTHOR: NATHAN CAIRNS
 
-% TODO init nodes
-% TODO add stats
-% TODO maintain a close list
+% TODO fix stats?????????????
 
 % Imports %
 
@@ -12,12 +10,14 @@
 :- consult(counter).
 :- consult(eightPuzzle).
 
-% Predicate defs %
+% Dynamic predicate defs %
 
 % closed(state)
 :- dynamic closed/1.
 % node(Gvalue, State, Parent)
 :- dynamic node/3.
+% stat(Glebel, Generated, Duplicated, Expanded)
+:- dynamic stat/4.
 
 % Rules %
 
@@ -35,6 +35,7 @@ breadthFirstSearch(InitialState, Solution, Statistics) :-
 	% Retract all asserted facts
 	retractall(closed(_)),
 	retractall(node(_, _, _)),
+	retractall(stat(_, _, _, _)),
 	
 	% Assert init state as node
 	assert(node(0, InitialState, _)),
@@ -43,18 +44,15 @@ breadthFirstSearch(InitialState, Solution, Statistics) :-
 	recurseBfs(Q2, SolutionState),
 	
 	%Reconstruct solution
-	reconstructSolution(InitialState, SolutionState, Solution).
+	reconstructSolution(InitialState, SolutionState, PreSolution),
+	reverse(PreSolution, Solution),
 	
-% Reconstructs the solution given the solution node and the initial state
-% Base Case
-reconstructSolution(InitialState, InitialState, [InitialState]).
-% Recursive
-reconstructSolution(InitialState, CurrentState, Solution) :-
-	node(_, CurrentState, ParentState),
-	append([CurrentState], Solution2, Solution),
-	reconstructSolution(InitialState, ParentState, Solution2).
-		
-% Recursive BFS algorithm
+	% Get Statistics
+	node(Gvalue, SolutionState, _),
+	GvalueMax is Gvalue + 1,
+	constructStats(0, GvalueMax, Statistics).
+	
+% Recursive BFS aux algorithm
 % Base Case
 recurseBfs(Queue, State) :- 
 	serve_queue(Queue, State, _),
@@ -70,7 +68,7 @@ recurseBfs(Queue, Solution) :-
 	trimSucc(Successors, [], TrimmedSucc),
 	
 	node(Gvalue, State, _),
-	NextGvalue is Gvalue +1,
+	NextGvalue is Gvalue + 1,
 	
 	recurseSucc(TrimmedSucc, State, NextGvalue, Q2, Q3),
 	
@@ -102,3 +100,27 @@ recurseSucc([H|T], Parent, Gvalue, Queue, NewQueue) :-
 		incrementCounter(Gvalue, generated),
 		recurseSucc(T, Parent, Gvalue, Q2, NewQueue)
 	).
+	
+% Reconstructs the solution given the solution node and the initial state
+% Base Case
+reconstructSolution(InitialState, InitialState, [InitialState]).
+% Recursive
+reconstructSolution(InitialState, CurrentState, Solution) :-
+	node(_, CurrentState, ParentState),
+	append([CurrentState], Solution2, Solution),
+	reconstructSolution(InitialState, ParentState, Solution2).
+	
+% Constructs the statistics from the various counters
+% Base Case
+constructStats(GvalueMax, GvalueMax, []).
+% Recursive
+constructStats(Gvalue, GvalueMax, Statistics) :-
+	getValueCounter(Gvalue, generated, GeneratedValue),
+	getValueCounter(Gvalue, expanded, ExpandedValue),
+	getValueCounter(Gvalue, duplicated, DuplicatedValue),
+	assert(stat(Gvalue, GeneratedValue, DuplicatedValue, ExpandedValue)),
+	append([stat(Gvalue, GeneratedValue, DuplicatedValue, ExpandedValue)], Statistics2, Statistics),
+	plus(Gvalue, 1, NextGvalue),
+	constructStats(NextGvalue, GvalueMax, Statistics2).
+	
+	
