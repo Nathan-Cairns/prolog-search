@@ -49,9 +49,9 @@ breadthFirstSearch(InitialState, Solution, Statistics) :-
 % Base Case
 reconstructSolution(InitialState, InitialState, [InitialState]).
 % Recursive
-reconstructSolution(InitialState, CurrentState, Solution).
+reconstructSolution(InitialState, CurrentState, Solution) :-
 	node(_, CurrentState, ParentState),
-	append([CurrentState], Solution2, Solution).
+	append([CurrentState], Solution2, Solution),
 	reconstructSolution(InitialState, ParentState, Solution2).
 		
 % Recursive BFS algorithm
@@ -68,9 +68,13 @@ recurseBfs(Queue, Solution) :-
 	% Get successors of state and add them to the queue	
 	succ8(State, Successors),
 	trimSucc(Successors, [], TrimmedSucc),
-	recurseSucc(TrimmedSucc, State, , Q2, Q3), % TODO G VALUE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	
-	incrementCounter( , expanded), % TODO G VALUE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	node(Gvalue, State, _),
+	NextGvalue is Gvalue +1,
+	
+	recurseSucc(TrimmedSucc, State, NextGvalue, Q2, Q3),
+	
+	incrementCounter(Gvalue, expanded), 
 	
 	recurseBfs(Q3, Solution).
 
@@ -84,16 +88,17 @@ trimSucc([(_, State)|T], TrimmedSucc, Output) :-
 	
 % Adds a list of states to the queue
 % Base Case
-recurseSucc([], Parent, Gvalue Queue, Queue).
+recurseSucc([], _, _, Queue, Queue).
 % Recursive
 recurseSucc([H|T], Parent, Gvalue, Queue, NewQueue) :-
 	(closed(H) ->
 		(node(Gvalue, H, _) -> 
 			incrementCounter(Gvalue, duplicated)
+			; true
 		),
-		recurseSucc(T, Queue, NewQueue)
+		recurseSucc(T, Parent, Gvalue, Queue, NewQueue)
 		; join_queue(H, Queue, Q2),
 		assert(node(Gvalue, H, Parent)),
 		incrementCounter(Gvalue, generated),
-		recurseSucc(T, Q2, NewQueue)
+		recurseSucc(T, Parent, Gvalue, Q2, NewQueue)
 	).
