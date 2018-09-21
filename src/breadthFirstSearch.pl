@@ -13,6 +13,11 @@
 :- consult(counter).
 :- consult(eightPuzzle).
 
+% Predicate defs %
+
+:- dynamic closed/1.
+:- dynamic node/3.
+
 % Rules %
 
 % Node predicate
@@ -22,33 +27,31 @@ initNode(Gvalue, State, Parent) :-
 % This bfs will solve an eight-puzzle problem.
 breadthFirstSearch(InitialState, Solution, Statistics) :-
 	make_queue(Q1),
-	initNode(0, InitialState, []),	
 	join_queue(InitialState, Q1, Q2),
-		recurseBfs(Q2).
+	recurseBfs(Q2, Solution).
 	
 % RecurseBfs
-% Base Case - goal state
-recurseBfs(Queue) :-
-	serve_queue(Queue, State, NewQueue),
+recurseBfs(Queue, State) :- 
+	serve_queue(Queue, State, _),
 	goal8(State).
-% Recursive
-recurseBfs(Queue) :-
-	% Get succ states and join them to the queue
-	serve_queue(Queue, State, NewQueue),
+recurseBfs(Queue, Solution) :-
+	serve_queue(Queue, State, Q2),
+	assert(closed(State)),
 	succ8(State, Successors),
-	recurseStateList(Successors, NewQueue),
+	trimSucc(Successors, [], TrimmedSucc),
+	recurseSucc(TrimmedSucc, Q2, Q3),
+	recurseBfs(Q3, Solution).
+
+% Trims the succ tuple
+trimSucc([], TrimmedSucc, TrimmedSucc).
+trimSucc([(_, State)|T], TrimmedSucc, Output) :-
+	append(TrimmedSucc, [State], TrimmedSucc2),
+	trimSucc(T, TrimmedSucc2, Output).
 	
-	% Recurse
-	recurseBfs(NewQueue).
-	
-% recurseStateList
-% Traverses a list of states adding each one to the queue
-% Base Case
-recurseStateList([], Queue).
-% Recursive
-recurseStateList([H|T], Queue) :-
-		join_queue(H, Queue, NewQueue),
-		recurseStateList(T, NewQueue).
-	
-	
-	
+% Recurse succ
+recurseSucc([], Queue, Queue).
+recurseSucc([H|T], Queue, NewQueue) :-
+	(closed(H) ->
+		recurseSucc(T, Queue, NewQueue)
+		; join_queue(H, Queue, Q2), recurseSucc(T, Q2, NewQueue)
+	).

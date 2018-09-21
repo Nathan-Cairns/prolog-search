@@ -57,7 +57,7 @@ succ8(state, successors) - find all successors of current node
 goal8() - tells if current state is the goal state
 
 use the following to avoid ... in lists
-?- set_prolog_flag(answer_write_options,[max_depth(0)]).
+set_prolog_flag(answer_write_options,[max_depth(0)]).
 
 queues...
 
