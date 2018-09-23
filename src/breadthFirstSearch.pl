@@ -90,10 +90,8 @@ recurseSucc([], _, _, Queue, Queue).
 % Recursive
 recurseSucc([H|T], Parent, Gvalue, Queue, NewQueue) :-
 	(closed(H) ->
-		(node(Gvalue, H, _) -> 
-			incrementCounter(Gvalue, duplicated)
-			; true
-		),
+		incrementCounter(Gvalue, duplicated),
+		incrementCounter(Gvalue, generated),
 		recurseSucc(T, Parent, Gvalue, Queue, NewQueue)
 		; join_queue(H, Queue, Q2),
 		assert(node(Gvalue, H, Parent)),
