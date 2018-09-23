@@ -1,6 +1,10 @@
+# Submission
+submission
+
 # Report
 *.doc
 *.docx
+*.tmp
 
 # Prolog
 *.swp
