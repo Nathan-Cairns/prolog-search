@@ -1,3 +1,8 @@
+# Report
+*.doc
+*.docx
+
+# Prolog
 *.swp
 .DS_Store
 bin/configlet
